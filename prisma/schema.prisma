@@ -1,0 +1,48 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id       Int    @id @default(autoincrement())
+  category String @db.VarChar(31)
+}
+
+model Like {
+  id      Int     @id @default(autoincrement())
+  liked   Boolean
+  post_id Int
+  user_id Int
+  User    User    @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "like_ibfk_1")
+  Post    Post    @relation(fields: [post_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "like_ibfk_2")
+
+  @@index([post_id], map: "post_id")
+  @@index([user_id], map: "user_id")
+}
+
+model Post {
+  id          Int      @id @default(autoincrement())
+  title       String   @db.VarChar(255)
+  content     String   @db.Text
+  created_at  DateTime @db.Timestamp(0)
+  updated_at  DateTime @db.Timestamp(0)
+  category_id Int
+  user_id     Int
+  Like        Like[]
+
+  @@index([category_id], map: "category_id")
+}
+
+model User {
+  id       Int     @id @default(autoincrement())
+  name     String  @db.VarChar(31)
+  email    String  @db.VarChar(255)
+  password String  @db.VarChar(255)
+  is_admin Boolean
+  Like     Like[]
+}
