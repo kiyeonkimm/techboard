@@ -1,42 +1,24 @@
-import ActionButton from '@/components/ui/action-button';
-import { Button } from '@/components/ui/button';
+//hanaro/app/page.tsx
 import Link from 'next/link';
-import { login, logout } from '@/lib/actions/sign';
-import { auth } from '@/lib/auth';
-import ProfileImageButton from './ProfileImageButton';
+import db from '@/lib/db';
 
 export default async function Home() {
-  const session = await auth();
-  console.log('🚀 session:', session);
+  const categories = await db.category.findMany();
 
   return (
-    <div className='grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]'>
-      <h1 className='text-2xl'>Global Page: {session?.user?.name}</h1>
-      {!!session?.user && (
-        <ProfileImageButton
-          name={session.user.name || ''}
-          image={session.user.image || ''}
-          logoutAction={logout}
-        />
-      )}
-
-      <div className='flex flex-wrap space-x-3'>
-        {!session?.user && (
-          <form action={login}>
-            <Button>SignIn</Button>
-          </form>
-        )}
-
-        <ActionButton action={login}>Google Login</ActionButton>
-
-        <ActionButton action={login}>Kakao Login</ActionButton>
-
-        <Link href='/api/auth/signin'>Go Login</Link>
-        <span>|</span>
-        <Link href='/api/auth/signout'>Go Logout</Link>
-        <span>|</span>
-        <Link href='/hello'>Go HELLO</Link>
+    <main className='max-w-4xl mx-auto py-10'>
+      <h1 className='text-2xl font-bold mb-6'>게시판을 선택해주세요</h1>
+      <div className='grid grid-cols-2 gap-4'>
+        {categories.map((category) => (
+          <Link
+            key={category.id}
+            href={`/category/${category.id}`} // ✅ 여기 숫자 ID로 고침
+            className='border rounded-lg p-6 hover:bg-gray-50'
+          >
+            {category.category}
+          </Link>
+        ))}
       </div>
-    </div>
+    </main>
   );
 }

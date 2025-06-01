@@ -42,17 +42,15 @@ function Button({
   className,
   variant,
   size,
-  asChild = false,
+  // Removed unused asChild prop
   ...props
-}: React.ComponentProps<'button'> &
-  VariantProps<typeof buttonVariants> & {
-    asChild?: boolean;
-  }) {
+}: React.ComponentProps<'button'> & VariantProps<typeof buttonVariants>) {
   return (
-    <div>
-      data-slot='button' className=
-      {cn(buttonVariants({ variant, size, className }))}
-    </div>
+    <button
+      data-slot='button'
+      className={cn(buttonVariants({ variant, size, className }))}
+      {...props}
+    ></button>
   );
 }
 
