@@ -38,7 +38,8 @@ export default function LoginPage({ searchParams }: Props) {
       router.push(redirectTo);
     } else {
       alert('로그인 실패. 회원가입 페이지로 이동합니다.');
-      router.push(`/auth/regist?email=${email}`);
+      //   router.push(`/auth/signin?email=${email}`);
+      router.push(`/signup`);
     }
   };
 

@@ -1,7 +1,7 @@
 import LikeButton from '@/app/components/LikeButton';
 import { Button } from '@/components/ui/button';
 import { redirect } from 'next/navigation';
-//import { auth } from '@/lib/auth';
+import { auth } from '@/lib/auth';
 import db from '@/lib/db';
 
 export default async function PostPage({
@@ -9,7 +9,7 @@ export default async function PostPage({
 }: {
   params: Promise<{ categoryId: string; postId: string }>;
 }) {
-  const { postId, categoryId } = await params; // ✅ await 구조분해로 경고 회피
+  const { postId, categoryId } = await params;
 
   const numericPostId = Number(postId);
   const numericCategoryId = Number(categoryId);
@@ -26,8 +26,8 @@ export default async function PostPage({
     return <div>존재하지 않는 게시글입니다.</div>;
   }
 
-  // const session = await auth();
-  // const isAuthor = session?.user?.id === post.user_id;
+  const session = await auth();
+  const isAdmin = session?.user?.is_admin === true;
 
   return (
     <div className='max-w-4xl mx-auto px-6 py-12 space-y-6'>
@@ -45,34 +45,33 @@ export default async function PostPage({
 
       <div className='whitespace-pre-wrap text-gray-800'>{post.content}</div>
 
-      {/* {isAuthor && ( */}
-      <form
-        action={async () => {
-          'use server';
-          await db.post.delete({ where: { id: numericPostId } });
-          redirect(`/category/${numericCategoryId}`);
-        }}
-      >
-        <div className='flex justify-end space-x-2 pt-8'>
-          <a
-            href={`/category/${numericCategoryId}/${numericPostId}/edit`}
-            className='px-4 py-2 rounded bg-blue-500 text-white text-sm hover:bg-blue-600'
-          >
-            수정
-          </a>
-          <Button type='submit' variant='delete'>
-            삭제
-          </Button>
-        </div>
-        <div></div>
-      </form>
-      {/* 
-      <ThumbsUp />
-      <ThumbsDown /> */}
-      {/* <LikeButton postId={numericPostId} userId={post.user_id}></LikeButton> */}
-      <LikeButton postId={numericPostId} userId={1}></LikeButton>
+      {/* 관리자만 삭제/수정 가능 */}
+      {isAdmin && (
+        <form
+          action={async () => {
+            'use server';
+            await db.post.delete({ where: { id: numericPostId } });
+            redirect(`/category/${numericCategoryId}`);
+          }}
+        >
+          <div className='flex justify-end space-x-2 pt-8'>
+            <a
+              href={`/category/${numericCategoryId}/${numericPostId}/edit`}
+              className='px-4 py-2 rounded bg-blue-500 text-white text-sm hover:bg-blue-600'
+            >
+              수정
+            </a>
+            <Button type='submit' variant='delete'>
+              삭제
+            </Button>
+          </div>
+        </form>
+      )}
 
-      {/* {isAuthor ? ( */}
+      <LikeButton
+        postId={numericPostId}
+        userId={Number(session?.user?.id) ?? 0}
+      />
 
       <a
         href={`/category/${numericCategoryId}`}

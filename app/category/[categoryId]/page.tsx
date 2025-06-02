@@ -1,12 +1,15 @@
 import Link from 'next/link';
+import { auth } from '@/lib/auth';
 import db from '@/lib/db';
+
+// ✅ 세션 불러오기 추가
 
 export default async function CategoryPage({
   params,
 }: {
   params: Promise<{ categoryId: string }>;
 }) {
-  // params를 await로 해결
+  const session = await auth(); // ✅ 세션 확인
   const { categoryId: categoryIdParam } = await params;
   const categoryId = Number(categoryIdParam);
 
@@ -31,17 +34,18 @@ export default async function CategoryPage({
     <div className='max-w-4xl mx-auto px-6 py-12 space-y-10'>
       <h1 className='text-3xl font-semibold'>{category.category} 게시판</h1>
 
-      {/* 글쓰기 버튼 */}
-      <div className='flex justify-end'>
-        <Link
-          href={`/category/${categoryId}/write`}
-          className='inline-block bg-pink-400 text-white text-sm font-medium px-4 py-2 rounded hover:bg-pink-600'
-        >
-          글쓰기
-        </Link>
-      </div>
+      {/* ✅ 관리자만 글쓰기 버튼 */}
+      {session?.user?.is_admin && (
+        <div className='flex justify-end'>
+          <Link
+            href={`/category/${categoryId}/write`}
+            className='inline-block bg-pink-400 text-white text-sm font-medium px-4 py-2 rounded hover:bg-pink-600'
+          >
+            글쓰기
+          </Link>
+        </div>
+      )}
 
-      {/* 게시글 리스트 */}
       {posts.length === 0 ? (
         <p className='text-gray-500'>아직 작성된 글이 없습니다.</p>
       ) : (

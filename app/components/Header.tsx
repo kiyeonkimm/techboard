@@ -25,9 +25,17 @@ export default function HeaderClient() {
               </Link>
             )}
 
+            <Link
+              href='/mypage'
+              className='text-sm text-gray-600 hover:underline'
+            >
+              마이페이지
+            </Link>
+
             <span className='text-sm text-gray-600'>
               안녕하세요, {user.name} 님!
             </span>
+
             <button
               onClick={() => signOut({ callbackUrl: '/' })}
               className='text-sm text-red-500 hover:underline'
