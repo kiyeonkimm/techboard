@@ -7,6 +7,8 @@
 
 // //hanaro/app/category/page.tsx
 
+// //hanaro/app/category/page.tsx
+
 // async function createPost(formData: FormData) {
 //   // Add your logic to handle form submission
 //   console.log('Form submitted:', Object.fromEntries(formData.entries()));

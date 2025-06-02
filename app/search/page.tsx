@@ -4,16 +4,15 @@ import db from '@/lib/db';
 export default async function SearchPage({
   searchParams,
 }: {
-  searchParams: Record<string, string | string[] | undefined>;
+  searchParams?: { [key: string]: string | string[] | undefined };
 }) {
-  const keyword =
-    typeof searchParams.q === 'string' ? searchParams.q.trim() : '';
+  const raw = searchParams?.q;
+  const keyword = typeof raw === 'string' ? raw.trim() : '';
 
   if (!keyword) {
     return <div className='p-8 text-gray-500'>검색어를 입력해주세요.</div>;
   }
 
-  // ✅ 게시글 검색
   const posts = await db.post.findMany({
     where: {
       OR: [
@@ -24,7 +23,6 @@ export default async function SearchPage({
     orderBy: { created_at: 'desc' },
   });
 
-  // ✅ 모든 카테고리 조회 → category_id 매핑
   const categories = await db.category.findMany();
   const categoryMap = new Map(categories.map((c) => [c.id, c.category]));
 

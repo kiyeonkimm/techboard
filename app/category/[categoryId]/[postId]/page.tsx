@@ -1,3 +1,5 @@
+import LikeButton from '@/app/components/LikeButton';
+import { Button } from '@/components/ui/button';
 import { redirect } from 'next/navigation';
 //import { auth } from '@/lib/auth';
 import db from '@/lib/db';
@@ -30,9 +32,17 @@ export default async function PostPage({
   return (
     <div className='max-w-4xl mx-auto px-6 py-12 space-y-6'>
       <h1 className='text-2xl font-bold'>{post.title}</h1>
-      <p className='text-sm text-gray-500'>
-        작성일: {new Date(post.created_at).toLocaleString('ko-KR')}
+
+      <p className='text-sm text-gray-500 flex gap-4'>
+        작성일: {new Date(post.created_at).toLocaleString()}
+        {post.updated_at &&
+          post.updated_at.getTime() !== post.created_at.getTime() && (
+            <span className='text-gray-400'>
+              수정일: {new Date(post.updated_at).toLocaleString()}
+            </span>
+          )}
       </p>
+
       <div className='whitespace-pre-wrap text-gray-800'>{post.content}</div>
 
       {/* {isAuthor && ( */}
@@ -48,17 +58,28 @@ export default async function PostPage({
             href={`/category/${numericCategoryId}/${numericPostId}/edit`}
             className='px-4 py-2 rounded bg-blue-500 text-white text-sm hover:bg-blue-600'
           >
-            ✏️ 수정
+            수정
           </a>
-          <button
-            type='submit'
-            className='px-4 py-2 rounded bg-red-500 text-white text-sm hover:bg-red-600'
-          >
-            🗑️ 삭제
-          </button>
+          <Button type='submit' variant='delete'>
+            삭제
+          </Button>
         </div>
+        <div></div>
       </form>
-      {/* )} */}
+      {/* 
+      <ThumbsUp />
+      <ThumbsDown /> */}
+      {/* <LikeButton postId={numericPostId} userId={post.user_id}></LikeButton> */}
+      <LikeButton postId={numericPostId} userId={1}></LikeButton>
+
+      {/* {isAuthor ? ( */}
+
+      <a
+        href={`/category/${numericCategoryId}`}
+        className='px-3 py-2 rounded bg-gray-500 text-white text-sm hover:bg-gray-600'
+      >
+        목록으로
+      </a>
     </div>
   );
 }

@@ -1,6 +1,8 @@
+import bcrypt from 'bcryptjs';
 import NextAuth from 'next-auth';
-import Credential from 'next-auth/providers/credentials';
+import Credentials from 'next-auth/providers/credentials';
 import Github from 'next-auth/providers/github';
+import db from '@/lib/db';
 
 export const {
   handlers: { GET, POST },
@@ -10,75 +12,84 @@ export const {
 } = NextAuth({
   providers: [
     Github,
-    Credential({
-      name: 'Email & Password',
+    Credentials({
+      name: 'Credentials',
       credentials: {
         email: { label: '이메일', type: 'email' },
-        password: { label: '패스워드', type: 'password' },
+        password: { label: '비밀번호', type: 'password' },
       },
       async authorize(credentials) {
-        console.log('🚀 credentials:', credentials);
         if (!credentials?.email || !credentials?.password) {
-          throw new Error('Email and password are required.');
+          return null;
         }
 
-        const user = {
-          id: 1,
-          name: 'Cred. Hong',
-          email: String(credentials.email),
-          image: '/globe.svg',
-        };
+        const user = await db.user.findUnique({
+          where: { email: String(credentials.email) },
+        });
 
-        if (!user) {
-          throw new Error('Invalid email or password.');
-        }
+        if (!user) return null;
 
-        // const isPasswordValid = await bcrypt.compare(
-        //   credentials.password,
-        //   user.password
-        // );
-        // if (!isPasswordValid) {
-        //   throw new Error('Invalid email or password.');
-        // }
+        const isValid = await bcrypt.compare(
+          String(credentials.password),
+          user.password
+        );
+
+        if (!isValid) return null;
 
         return {
           id: String(user.id),
           name: user.name,
           email: user.email,
-          image: user.image,
+          is_admin: user.is_admin,
         };
       },
     }),
   ],
-
-  session: {
-    strategy: 'jwt', // Using JWT for session management
-  },
   pages: {
-    signIn: '/auth/signin', // Customize sign-in page..
+    signIn: '/auth/signin',
+  },
+  session: {
+    strategy: 'jwt',
   },
   callbacks: {
-    async signIn({ user, account, profile }) {
-      console.log('🚀 signIn - user:', user, account, profile);
+    async signIn({ user, account }) {
+      if (account?.provider === 'github') {
+        // GitHub 유저가 DB에 없으면 생성
+        const existingUser = await db.user.findUnique({
+          where: { email: String(user.email) },
+        });
+
+        if (!existingUser) {
+          await db.user.create({
+            data: {
+              name: user.name ?? 'GitHubUser',
+              email: String(user.email),
+              password: '', // 비밀번호 없음
+              is_admin: false,
+            },
+          });
+        }
+      }
+
       return true;
     },
     async jwt({ token, user }) {
-      // console.log('🚀 jwt - token:', token, user);
       if (user) {
         token.id = user.id;
         token.email = user.email;
         token.name = user.name;
+        // token.is_admin = user.is_admin;
       }
       return token;
     },
-    // async session({ session, token }) {
-    //   console.log('🚀 cb - session:', session, token);
-    //   if (token) {
-    //     session.user.id = String(token.id);
-    //     session.user.email = token.email as string;
-    //     session.user.name = token.name;
-    //   }
-    //   return session;
-    // },
+    async session({ session, token }) {
+      if (token) {
+        session.user.id = token.id as string;
+        session.user.email = token.email as string;
+        session.user.name = token.name as string;
+        // session.user.is_admin = token.is_admin as boolean;
+      }
+      return session;
+    },
   },
 });
