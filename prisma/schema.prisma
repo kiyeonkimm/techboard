@@ -36,6 +36,7 @@ model Post {
   Like        Like[]
 
   @@index([category_id], map: "category_id")
+  @@fulltext([title, content], map: "idx_fulltext_title_content")
 }
 
 model User {
@@ -45,4 +46,11 @@ model User {
   password String  @db.VarChar(255)
   is_admin Boolean
   Like     Like[]
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model StopWord {
+  value String @id @db.VarChar(31)
+
+  
 }

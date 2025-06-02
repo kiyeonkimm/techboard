@@ -16,6 +16,15 @@ export default function HeaderClient() {
       <div className='flex gap-4 items-center'>
         {status === 'loading' ? null : user ? (
           <>
+            {user.is_admin && (
+              <Link
+                href='/adminpage'
+                className='text-sm text-blue-600 hover:underline font-medium'
+              >
+                관리자 페이지
+              </Link>
+            )}
+
             <span className='text-sm text-gray-600'>
               안녕하세요, {user.name} 님!
             </span>

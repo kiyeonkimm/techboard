@@ -78,7 +78,7 @@ export const {
         token.id = user.id;
         token.email = user.email;
         token.name = user.name;
-        // token.is_admin = user.is_admin;
+        token.is_admin = user.is_admin;
       }
       return token;
     },
@@ -87,7 +87,7 @@ export const {
         session.user.id = token.id as string;
         session.user.email = token.email as string;
         session.user.name = token.name as string;
-        // session.user.is_admin = token.is_admin as boolean;
+        session.user.is_admin = token.is_admin as boolean;
       }
       return session;
     },

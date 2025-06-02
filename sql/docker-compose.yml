@@ -7,6 +7,7 @@ services:
     env_file:
       - ../.env.local
     environment:
+      MYSQL_ROOT_PASSWORD: TestdbRoot
       MYSQL_DATABASE: hanarodb
     command:
       - --character-set-server=utf8mb4

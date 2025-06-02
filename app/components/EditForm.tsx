@@ -9,6 +9,8 @@ import { useState } from 'react';
 
 // components/post/EditForm.tsx
 
+// components/post/EditForm.tsx
+
 export default function EditForm({
   post,
   categoryId,
