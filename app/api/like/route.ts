@@ -1,4 +1,3 @@
-// hanaro/app/api/like/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import db from '@/lib/db';
@@ -17,18 +16,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: '입력값 오류' }, { status: 400 });
   }
 
-  // 기존 좋아요/싫어요 여부 확인
   const existing = await db.like.findFirst({
     where: { post_id: postId, user_id: userId },
   });
 
   if (existing) {
     if (existing.liked === liked) {
-      // 같은 값을 누르면 취소
+      // 같은 버튼 → 취소
       await db.like.delete({ where: { id: existing.id } });
       return NextResponse.json({ ok: true, action: 'removed' });
     } else {
-      // 반대 값이면 업데이트
+      // 반대 버튼 → 전환
       await db.like.update({
         where: { id: existing.id },
         data: { liked },
@@ -36,7 +34,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true, action: 'updated' });
     }
   } else {
-    // 없으면 새로 생성
+    // 처음 클릭 → 생성
     await db.like.create({
       data: { user_id: userId, post_id: postId, liked },
     });
@@ -44,7 +42,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// ✅ GET: 좋아요 상태 확인
+// ✅ GET: 좋아요/싫어요 상태 조회
 export async function GET(req: NextRequest) {
   const postId = Number(req.nextUrl.searchParams.get('postId'));
   const userId = Number(req.nextUrl.searchParams.get('userId'));

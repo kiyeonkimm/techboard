@@ -1,6 +1,7 @@
 'use client';
 
 import { ThumbsUp, ThumbsDown } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 type Props = {
@@ -9,44 +10,44 @@ type Props = {
 };
 
 export default function LikeButton({ postId, userId }: Props) {
-  const [liked, setLiked] = useState<null | boolean>(null); // true = 좋아요, false = 싫어요, null = 없음
+  const [liked, setLiked] = useState<null | boolean>(null);
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
+    // 로그인한 경우에만 상태 불러오기
     const fetchLike = async () => {
-      if (!userId) return; // 로그인 안한 경우 요청 안 보냄
-      try {
-        const res = await fetch(`/api/like?postId=${postId}&userId=${userId}`);
-        const data = await res.json();
-        setLiked(data.liked); // null | true | false
-      } catch (err) {
-        console.error('좋아요 상태 조회 실패:', err);
-      }
+      const res = await fetch(`/api/like?postId=${postId}&userId=${userId}`);
+      const data = await res.json();
+      setLiked(data.liked); // true / false / null
     };
 
-    fetchLike();
+    if (userId) fetchLike();
   }, [postId, userId]);
 
   const handleClick = async (newLiked: boolean) => {
-    if (!userId || loading) return;
+    if (loading) return;
+
+    if (!userId) {
+      alert('로그인이 필요합니다.');
+      router.push('/login'); // ✅ 로그인 페이지로 이동
+      return;
+    }
+
     setLoading(true);
 
-    try {
-      const res = await fetch('/api/like', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ postId, liked: newLiked }),
-      });
+    const res = await fetch('/api/like', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ postId, liked: newLiked }),
+    });
 
-      if (res.ok) {
-        if (liked === newLiked) {
-          setLiked(null); // 같은 걸 누르면 취소
-        } else {
-          setLiked(newLiked);
-        }
+    if (res.ok) {
+      if (liked === newLiked) {
+        setLiked(null); // 같은 버튼 → 취소
+      } else {
+        setLiked(newLiked); // 반대 버튼 → 전환
       }
-    } catch (err) {
-      console.error('좋아요 변경 실패:', err);
     }
 
     setLoading(false);
@@ -57,14 +58,14 @@ export default function LikeButton({ postId, userId }: Props) {
       <button
         onClick={() => handleClick(true)}
         className={`flex items-center gap-1 ${liked === true ? 'text-blue-500' : 'text-gray-400'}`}
-        disabled={loading || !userId}
+        disabled={loading}
       >
         <ThumbsUp size={18} /> 좋아요
       </button>
       <button
         onClick={() => handleClick(false)}
         className={`flex items-center gap-1 ${liked === false ? 'text-red-500' : 'text-gray-400'}`}
-        disabled={loading || !userId}
+        disabled={loading}
       >
         <ThumbsDown size={18} /> 싫어요
       </button>
