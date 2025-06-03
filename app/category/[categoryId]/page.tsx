@@ -1,24 +1,22 @@
+// hanaro/app/category/[categoryId]/page.tsx
 import Link from 'next/link';
 import { auth } from '@/lib/auth';
 import db from '@/lib/db';
 
-// ✅ 세션 불러오기 추가
-
 export default async function CategoryPage({
   params,
 }: {
-  params: Promise<{ categoryId: string }>;
+  params: Promise<{ categoryId: string }>; // ✅ Promise 타입
 }) {
-  const session = await auth(); // ✅ 세션 확인
-  const { categoryId: categoryIdParam } = await params;
-  const categoryId = Number(categoryIdParam);
+  const { categoryId } = await params; // ✅ 비동기 처리
+  const numericCategoryId = Number(categoryId);
 
-  if (Number.isNaN(categoryId)) {
+  if (Number.isNaN(numericCategoryId)) {
     return <div>잘못된 경로입니다.</div>;
   }
 
   const category = await db.category.findUnique({
-    where: { id: categoryId },
+    where: { id: numericCategoryId },
   });
 
   if (!category) {
@@ -26,19 +24,21 @@ export default async function CategoryPage({
   }
 
   const posts = await db.post.findMany({
-    where: { category_id: categoryId },
+    where: { category_id: numericCategoryId },
     orderBy: { created_at: 'desc' },
   });
+
+  const session = await auth(); // ✅ headers() 이후 호출 필수
 
   return (
     <div className='max-w-4xl mx-auto px-6 py-12 space-y-10'>
       <h1 className='text-3xl font-semibold'>{category.category} 게시판</h1>
 
-      {/* ✅ 관리자만 글쓰기 버튼 */}
+      {/* ✅ 관리자만 글쓰기 가능 */}
       {session?.user?.is_admin && (
         <div className='flex justify-end'>
           <Link
-            href={`/category/${categoryId}/write`}
+            href={`/category/${numericCategoryId}/write`}
             className='inline-block bg-pink-400 text-white text-sm font-medium px-4 py-2 rounded hover:bg-pink-600'
           >
             글쓰기
@@ -52,7 +52,7 @@ export default async function CategoryPage({
         <ul className='space-y-6'>
           {posts.map((post) => (
             <li key={post.id} className='border-b pb-4'>
-              <Link href={`/category/${categoryId}/${post.id}`}>
+              <Link href={`/category/${numericCategoryId}/${post.id}`}>
                 <div className='text-xl font-medium hover:underline'>
                   {post.title}
                 </div>

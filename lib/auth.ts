@@ -19,21 +19,17 @@ export const {
         password: { label: '비밀번호', type: 'password' },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          return null;
-        }
+        if (!credentials?.email || !credentials?.password) return null;
 
         const user = await db.user.findUnique({
           where: { email: String(credentials.email) },
         });
-
         if (!user) return null;
 
         const isValid = await bcrypt.compare(
           String(credentials.password),
           user.password
         );
-
         if (!isValid) return null;
 
         return {
@@ -54,7 +50,6 @@ export const {
   callbacks: {
     async signIn({ user, account }) {
       if (account?.provider === 'github') {
-        // GitHub 유저가 DB에 없으면 생성
         const existingUser = await db.user.findUnique({
           where: { email: String(user.email) },
         });
@@ -64,8 +59,8 @@ export const {
             data: {
               name: user.name ?? 'GitHubUser',
               email: String(user.email),
-              password: '', // 비밀번호 없음
-              is_admin: false,
+              password: '', // 소셜 로그인은 비밀번호 없음
+              is_admin: false, // 🔥 GitHub은 무조건 일반 유저로 등록
             },
           });
         }
@@ -73,15 +68,23 @@ export const {
 
       return true;
     },
-    async jwt({ token, user }) {
+
+    async jwt({ token, user, account }) {
       if (user) {
         token.id = user.id;
         token.email = user.email;
         token.name = user.name;
-        token.is_admin = user.is_admin;
+
+        // 🔥 GitHub 로그인은 관리자 아님
+        if (account?.provider === 'github') {
+          token.is_admin = false;
+        } else {
+          token.is_admin = user.is_admin;
+        }
       }
       return token;
     },
+
     async session({ session, token }) {
       if (token) {
         session.user.id = token.id as string;

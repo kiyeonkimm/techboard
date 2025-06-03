@@ -1,0 +1,20 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/lib/auth';
+import db from '@/lib/db';
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function DELETE(_req: NextRequest) {
+  const session = await auth();
+  if (!session) {
+    return NextResponse.json(
+      { error: '로그인이 필요합니다.' },
+      { status: 401 }
+    );
+  }
+
+  await db.user.delete({
+    where: { id: Number(session.user.id) },
+  });
+
+  return NextResponse.json({ ok: true });
+}

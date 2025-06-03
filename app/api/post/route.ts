@@ -1,8 +1,16 @@
-// app/api/posts/route.ts
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/lib/auth';
 import db from '@/lib/db';
 
 export async function POST(req: NextRequest) {
+  const session = await auth();
+  if (!session || !session.user?.id || !session.user?.is_admin) {
+    return NextResponse.json(
+      { error: '글 작성은 관리자만 가능합니다.' },
+      { status: 403 }
+    );
+  }
+
   const formData = await req.formData();
   const title = formData.get('title') as string;
   const content = formData.get('content') as string;
@@ -15,17 +23,12 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // 세션에서 userId 가져오기 (로그인 연동되면 아래처럼 교체)
-  // const session = await getServerSession(authOptions);
-  // const userId = session?.user?.id;
-  // if (!userId) return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 });
-
   await db.post.create({
     data: {
       title,
       content,
       category_id: categoryId,
-      user_id: 1, // ← 로그인 연동되면 위처럼 교체
+      user_id: Number(session.user.id),
       created_at: new Date(),
       updated_at: new Date(),
     },

@@ -18,8 +18,8 @@ model Like {
   liked   Boolean
   post_id Int
   user_id Int
-  User    User    @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "like_ibfk_1")
-  Post    Post    @relation(fields: [post_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "like_ibfk_2")
+  User    User    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "like_ibfk_1")
+  Post    Post    @relation(fields: [post_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "like_ibfk_2")
 
   @@index([post_id], map: "post_id")
   @@index([user_id], map: "user_id")
@@ -35,6 +35,7 @@ model Post {
   user_id     Int
   Like        Like[]
 
+  User        User     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   @@index([category_id], map: "category_id")
   @@fulltext([title, content], map: "idx_fulltext_title_content")
 }
@@ -46,11 +47,11 @@ model User {
   password String  @db.VarChar(255)
   is_admin Boolean
   Like     Like[]
+
+  Post Post[]
 }
 
 /// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
 model StopWord {
   value String @id @db.VarChar(31)
-
-  
 }

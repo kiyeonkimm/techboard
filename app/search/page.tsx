@@ -4,9 +4,10 @@ import db from '@/lib/db';
 export default async function SearchPage({
   searchParams,
 }: {
-  searchParams?: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const raw = searchParams?.q;
+  const resolvedParams = await searchParams;
+  const raw = resolvedParams.q;
   const keyword = typeof raw === 'string' ? raw.trim() : '';
 
   if (!keyword) {
@@ -15,11 +16,9 @@ export default async function SearchPage({
 
   // 1. 불용어 목록 불러오기
   const stopwords = await db.stopWord.findMany();
-  const stopSet = new Set(
-    stopwords.map((s: { value: string }) => s.value.toLowerCase())
-  );
+  const stopSet = new Set(stopwords.map((s) => s.value.toLowerCase()));
 
-  // 2. 키워드를 공백 기준 나눠 불용어 제외
+  // 2. 키워드에서 불용어 제거
   const terms = keyword
     .split(/\s+/)
     .map((w) => w.toLowerCase())
@@ -29,7 +28,7 @@ export default async function SearchPage({
     return <div className='p-8 text-gray-500'>유효한 검색어가 없습니다.</div>;
   }
 
-  // 3. OR 조건으로 검색 (여러 단어 중 하나라도 포함되면)
+  // 3. 검색
   const posts = await db.post.findMany({
     where: {
       OR: terms.flatMap((term) => [

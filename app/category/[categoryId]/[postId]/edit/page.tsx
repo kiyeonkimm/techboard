@@ -1,13 +1,19 @@
-// app/category/[categoryId]/[postId]/edit/page.tsx
 import PostForm from '@/app/components/PostForm';
+import { redirect } from 'next/navigation';
+import { auth } from '@/lib/auth';
 import db from '@/lib/db';
 
 export default async function EditPage({
   params,
 }: {
-  params: Promise<{ categoryId: string; postId: string }>; // ✅ 여기 이렇게 바꿈
+  params: Promise<{ categoryId: string; postId: string }>;
 }) {
-  const { postId, categoryId } = await params; // ✅ 여기 await
+  const { postId, categoryId } = await params;
+
+  const session = await auth();
+  if (!session?.user?.is_admin) {
+    redirect(`/category/${categoryId}?error=not_admin`);
+  }
 
   const post = await db.post.findUnique({
     where: { id: Number(postId) },

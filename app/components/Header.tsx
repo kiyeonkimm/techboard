@@ -32,9 +32,7 @@ export default function HeaderClient() {
               마이페이지
             </Link>
 
-            <span className='text-sm text-gray-600'>
-              안녕하세요, {user.name} 님!
-            </span>
+            <span className='text-sm text-pink-600'>{user.name}님</span>
 
             <button
               onClick={() => signOut({ callbackUrl: '/' })}
