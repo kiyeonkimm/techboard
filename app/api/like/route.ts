@@ -2,16 +2,20 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import db from '@/lib/db';
 
-// ✅ POST: 좋아요/싫어요 처리
+// POST: 좋아요/싫어요 처리
 export async function POST(req: NextRequest) {
   const session = await auth();
-  if (!session?.user?.id) {
+
+  // 로그인 체크
+  const userId = Number(session?.user?.id);
+  if (!userId || Number.isNaN(userId)) {
     return NextResponse.json({ error: '로그인 필요' }, { status: 401 });
   }
 
-  const userId = Number(session.user.id);
+  // request body 파싱
   const { postId, liked } = await req.json();
 
+  // 타입 검증
   if (typeof postId !== 'number' || typeof liked !== 'boolean') {
     return NextResponse.json({ error: '입력값 오류' }, { status: 400 });
   }
@@ -42,12 +46,12 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// ✅ GET: 좋아요/싫어요 상태 조회
+// GET: 좋아요/싫어요 상태 조회
 export async function GET(req: NextRequest) {
   const postId = Number(req.nextUrl.searchParams.get('postId'));
   const userId = Number(req.nextUrl.searchParams.get('userId'));
 
-  if (!postId || !userId) {
+  if (!postId || !userId || Number.isNaN(postId) || Number.isNaN(userId)) {
     return NextResponse.json({ liked: null });
   }
 

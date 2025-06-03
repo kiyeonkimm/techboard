@@ -25,10 +25,7 @@ export default async function Home() {
 
       <form action='/search' method='GET' className='flex gap-2 mb-8'>
         <Input type='text' name='q' placeholder='검색어 입력하세요' />
-        <Button
-          type='submit'
-          className='bg-pink-400 text-white px-4 py-1 rounded'
-        >
+        <Button type='submit' variant='default'>
           검색
         </Button>
       </form>

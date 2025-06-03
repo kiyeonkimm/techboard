@@ -59,8 +59,8 @@ export const {
             data: {
               name: user.name ?? 'GitHubUser',
               email: String(user.email),
-              password: '', // 소셜 로그인은 비밀번호 없음
-              is_admin: false, // 🔥 GitHub은 무조건 일반 유저로 등록
+              password: '',
+              is_admin: false,
             },
           });
         }
@@ -71,17 +71,23 @@ export const {
 
     async jwt({ token, user, account }) {
       if (user) {
-        token.id = user.id;
         token.email = user.email;
         token.name = user.name;
 
-        // 🔥 GitHub 로그인은 관리자 아님
-        if (account?.provider === 'github') {
-          token.is_admin = false;
+        // ✅ DB에서 user.id와 is_admin을 확실하게 가져옴 (GitHub 대응)
+        const dbUser = await db.user.findUnique({
+          where: { email: user.email! },
+        });
+
+        if (dbUser) {
+          token.id = String(dbUser.id); // 🔥 핵심
+          token.is_admin = dbUser.is_admin;
         } else {
-          token.is_admin = user.is_admin;
+          token.id = '';
+          token.is_admin = false;
         }
       }
+
       return token;
     },
 
