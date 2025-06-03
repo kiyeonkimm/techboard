@@ -1,15 +1,9 @@
-// hanaro/app/category/[categoryId]/page.tsx
 import Link from 'next/link';
 import { auth } from '@/lib/auth';
 import db from '@/lib/db';
 
-export default async function CategoryPage({
-  params,
-}: {
-  params: Promise<{ categoryId: string }>; // ✅ Promise 타입
-}) {
-  const { categoryId } = await params; // ✅ 비동기 처리
-  const numericCategoryId = Number(categoryId);
+export default async function CategoryPage({ params }: any) {
+  const numericCategoryId = Number(params.categoryId);
 
   if (Number.isNaN(numericCategoryId)) {
     return <div>잘못된 경로입니다.</div>;
@@ -28,13 +22,12 @@ export default async function CategoryPage({
     orderBy: { created_at: 'desc' },
   });
 
-  const session = await auth(); // ✅ headers() 이후 호출 필수
+  const session = await auth();
 
   return (
     <div className='max-w-4xl mx-auto px-6 py-12 space-y-10'>
       <h1 className='text-3xl font-semibold'>{category.category} 게시판</h1>
 
-      {/* ✅ 관리자만 글쓰기 가능 */}
       {session?.user?.is_admin && (
         <div className='flex justify-end'>
           <Link
@@ -60,7 +53,6 @@ export default async function CategoryPage({
               <p className='text-sm text-gray-500'>
                 작성일: {new Date(post.created_at).toLocaleString()}
               </p>
-
               {post.updated_at &&
                 post.updated_at.getTime() !== post.created_at.getTime() && (
                   <p className='text-sm text-gray-400'>

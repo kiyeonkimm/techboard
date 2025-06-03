@@ -5,14 +5,18 @@ import db from '@/lib/db';
 export default async function AdminPage({
   searchParams,
 }: {
-  searchParams?: { q?: string };
+  searchParams: Promise<{ q?: string }>;
 }) {
-  const q = searchParams?.q?.trim() ?? '';
+  const { q } = await searchParams;
+  const trimmed = q?.trim() ?? '';
 
   const users = await db.user.findMany({
-    where: q
+    where: trimmed
       ? {
-          OR: [{ name: { contains: q } }, { email: { contains: q } }],
+          OR: [
+            { name: { contains: trimmed } },
+            { email: { contains: trimmed } },
+          ],
         }
       : undefined,
     orderBy: { id: 'asc' },
@@ -27,7 +31,7 @@ export default async function AdminPage({
         <Input
           type='text'
           name='q'
-          defaultValue={q}
+          defaultValue={trimmed}
           placeholder='이름 또는 이메일 검색'
         />
         <Button>검색</Button>

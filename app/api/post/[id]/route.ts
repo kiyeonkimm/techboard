@@ -2,11 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import db from '@/lib/db';
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  const postId = Number(params.id);
+function extractPostId(req: NextRequest) {
+  const id = req.nextUrl.pathname.split('/').pop();
+  return Number(id);
+}
+
+// ✅ GET
+export async function GET(req: NextRequest) {
+  const postId = extractPostId(req);
   if (Number.isNaN(postId)) {
     return NextResponse.json(
       { error: '유효하지 않은 ID입니다.' },
@@ -14,9 +17,7 @@ export async function GET(
     );
   }
 
-  const post = await db.post.findUnique({
-    where: { id: postId },
-  });
+  const post = await db.post.findUnique({ where: { id: postId } });
 
   if (!post) {
     return NextResponse.json({ error: '게시글이 없습니다.' }, { status: 404 });
@@ -25,10 +26,8 @@ export async function GET(
   return NextResponse.json(post);
 }
 
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+// ✅ PUT
+export async function PUT(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: '로그인 필요' }, { status: 401 });
@@ -37,7 +36,7 @@ export async function PUT(
   const userId = Number(session.user.id);
   const isAdmin = session.user.is_admin === true;
 
-  const postId = Number(params.id);
+  const postId = extractPostId(req);
   if (Number.isNaN(postId)) {
     return NextResponse.json(
       { error: '유효하지 않은 ID입니다.' },
@@ -77,10 +76,8 @@ export async function PUT(
   }
 }
 
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+// ✅ DELETE
+export async function DELETE(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: '로그인 필요' }, { status: 401 });
@@ -89,7 +86,7 @@ export async function DELETE(
   const userId = Number(session.user.id);
   const isAdmin = session.user.is_admin === true;
 
-  const postId = Number(params.id);
+  const postId = extractPostId(req);
   if (Number.isNaN(postId)) {
     return NextResponse.json(
       { error: '유효하지 않은 ID입니다.' },

@@ -20,7 +20,7 @@ const buttonVariants = cva(
           'hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50',
         link: 'text-primary underline-offset-4 hover:underline',
         delete:
-          'px-4 py-2 rounded bg-pink-500 text-white text-sm hover:bg-blue-600',
+          'px-4 py-2 rounded bg-pink-500 text-white text-sm hover:bg-pink-600',
       },
       size: {
         default: 'h-9 px-4 py-2 has-[>svg]:px-3',
