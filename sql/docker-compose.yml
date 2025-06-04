@@ -4,8 +4,6 @@ services:
     image: mysql:8.0
     ports:
       - 3309:3306
-    env_file:
-      - ../.env.local
     environment:
       MYSQL_ROOT_PASSWORD: TestdbRoot
       MYSQL_DATABASE: hanarodb
@@ -18,4 +16,3 @@ services:
 
     volumes:
       - ./mysql:/var/lib/mysql
-      - ./custom.cnf:/etc/mysql/conf.d/custom.cnf

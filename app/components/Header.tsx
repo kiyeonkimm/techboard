@@ -35,7 +35,7 @@ export default function HeaderClient() {
             <span className='text-sm text-pink-600'>{user.name}님</span>
 
             <button
-              onClick={() => signOut({ callbackUrl: '/' })}
+              onClick={() => signOut({ callbackUrl: '/login' })}
               className='text-sm text-red-500 hover:underline'
             >
               로그아웃

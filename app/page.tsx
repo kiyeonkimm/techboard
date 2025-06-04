@@ -1,16 +1,18 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
+import { getAllCategories } from '@/lib/actions/categoty-actions';
 import db from '@/lib/db';
+import prisma from '@/lib/db';
 
 export default async function Home() {
   // 1. 모든 카테고리 조회
-  const categories = await db.category.findMany();
+  const categories = await getAllCategories();
 
   // 2. 각 카테고리별로 최신 게시글 3개 조회
   const categoriesWithPosts = await Promise.all(
     categories.map(async (category) => {
-      const posts = await db.post.findMany({
+      const posts = await prisma.post.findMany({
         where: { category_id: category.id },
         orderBy: { created_at: 'desc' },
         take: 3,

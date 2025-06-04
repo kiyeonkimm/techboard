@@ -1,6 +1,12 @@
+'use server';
+
+import prisma from '../db';
 import db from '../db';
 import { Category } from '../generated/prisma';
 
-export async function getAllCategories(): Promise<Category[]> {
-  return await db.category.findMany();
+export async function getAllCategories() {
+  console.log('adfasd>>>>>>>>>>>>>>>>>>>');
+  const categories = await prisma.category.findMany();
+  console.log('categories', categories);
+  return categories;
 }

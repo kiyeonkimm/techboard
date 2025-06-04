@@ -24,7 +24,7 @@ export default function MyPage() {
 
     if (res.ok) {
       alert('이름이 수정되었습니다.\n다시 로그인 해주세요.');
-      await signOut({ callbackUrl: '/login' }); // ✅ 로그아웃 후 로그인 페이지로
+      await signOut({ callbackUrl: '/login' }); // 로그아웃 후 로그인 페이지로
     } else {
       alert('수정 실패');
     }

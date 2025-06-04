@@ -4,14 +4,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { getSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 export default function WritePage(props: any) {
   const router = useRouter();
+
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
 
-  const categoryId = props.params.categoryId;
+  // const categoryId = props.params.categoryId;
+  const categoryId = useParams().categoryId;
 
   useEffect(() => {
     getSession().then((session) => {
@@ -24,7 +26,7 @@ export default function WritePage(props: any) {
     event.preventDefault();
 
     const formData = new FormData(event.currentTarget);
-    formData.set('categoryId', categoryId);
+    formData.set('categoryId', String(categoryId));
 
     const res = await fetch('/api/post', {
       method: 'POST',
